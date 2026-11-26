@@ -1,8 +1,22 @@
 <% content_for :title, "Sign in · Tool Share" %>
 <h1>Sign in</h1>
-<%= form_with url: session_path, class: "card narrow" do |form| %>
-  <div class="field"><%= form.label :email_address, "Email" %><%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %></div>
-  <div class="field"><%= form.label :password %><%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %></div>
-  <div class="actions"><%= form.submit "Sign in" %> <%= link_to "Forgot password?", new_password_path %></div>
+<div class="card narrow auth-card">
+  <div data-controller="passkey"
+       data-passkey-options-url-value="<%= options_passkey_session_path %>"
+       data-passkey-submit-url-value="<%= passkey_session_path %>">
+    <button type="button" class="btn btn-block" data-passkey-target="button" data-action="passkey#authenticate">
+      🔑 Sign in with a passkey
+    </button>
+    <p class="field-error" data-passkey-target="error" hidden></p>
+    <div class="divider"><span>or get a link by email</span></div>
+  </div>
+
+  <%= form_with url: session_path do |form| %>
+    <div class="field">
+      <%= form.label :email_address, "Email" %>
+      <%= form.email_field :email_address, required: true, autocomplete: "username webauthn", value: params[:email_address] %>
+    </div>
+    <%= form.submit "Email me a sign-in link", class: "btn btn-block btn-ghost" %>
+  <% end %>
   <p class="small">New here? <%= link_to "Create an account", new_registration_path %></p>
-<% end %>
+</div>

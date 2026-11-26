@@ -1,0 +1,12 @@
+<% content_for :title, "Sign in · Tool Share" %>
+<div class="card narrow" style="margin-top:32px">
+  <% if @valid %>
+    <h1 style="margin-top:0">Continue to Tool Share</h1>
+    <p>Click the button to finish signing in.</p>
+    <%= button_to "Sign me in", magic_link_path, params: { token: @token }, class: "btn btn-block" %>
+  <% else %>
+    <h1 style="margin-top:0">Link expired</h1>
+    <p>This link has expired or was already used.</p>
+    <%= link_to "Get a new link", new_session_path, class: "btn" %>
+  <% end %>
+</div>

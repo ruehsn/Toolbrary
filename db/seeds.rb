@@ -1,14 +1,14 @@
-# Demo data: bin/rails db:seed   (all demo passwords are "password123")
-alice = User.find_or_create_by!(email_address: "alice@example.com") { |u| u.name = "Alice"; u.password = "password123" }
-bob   = User.find_or_create_by!(email_address: "bob@example.com")   { |u| u.name = "Bob";   u.password = "password123" }
+# Demo data: bin/rails db:seed   (sign in via email link; see /letter_opener in development)
+alice = User.find_or_create_by!(email_address: "alice@example.com") { |u| u.name = "Alice" }
+bob   = User.find_or_create_by!(email_address: "bob@example.com")   { |u| u.name = "Bob" }
 
 [
-  [alice, "Cordless drill (18V)", "Power tools", "Good", "Two batteries + charger included."],
-  [alice, "Extension ladder 6m", "Ladders & access", "Fair", "Heavy — bring a helper to collect."],
-  [alice, "Hedge trimmer", "Garden & yard", "Good", nil],
-  [bob,   "Circular saw", "Power tools", "New", "Please use your own blades."],
-  [bob,   "Pipe wrench set", "Plumbing", "Worn", nil],
-  [bob,   "Laser level", "Measuring", "Good", "Takes 2x AA batteries."]
+  [ alice, "Cordless drill (18V)", "Power tools", "Good", "Two batteries + charger included." ],
+  [ alice, "Extension ladder 6m", "Ladders & access", "Fair", "Heavy — bring a helper to collect." ],
+  [ alice, "Hedge trimmer", "Garden & yard", "Good", nil ],
+  [ bob,   "Circular saw", "Power tools", "New", "Please use your own blades." ],
+  [ bob,   "Pipe wrench set", "Plumbing", "Worn", nil ],
+  [ bob,   "Laser level", "Measuring", "Good", "Takes 2x AA batteries." ]
 ].each do |owner, name, category, condition, description|
   owner.tools.find_or_create_by!(name: name) { |t| t.assign_attributes(category:, condition:, description:) }
 end

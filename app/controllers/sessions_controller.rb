@@ -1,17 +1,22 @@
 class SessionsController < ApplicationController
-  allow_unauthenticated_access only: %i[ new create ]
-  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  allow_unauthenticated_access only: %i[new create check_email]
+  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Too many attempts. Try again in a few minutes." }
 
   def new
   end
 
+  # Emails a magic sign-in link. The response is identical whether or not the
+  # address has an account, so this can't be used to discover who is registered.
   def create
-    if user = User.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
-      redirect_to after_authentication_url
-    else
-      redirect_to new_session_path, alert: "Try another email address or password."
+    email = params[:email_address].to_s.strip.downcase
+    if (user = User.find_by(email_address: email))
+      AuthMailer.magic_link(user).deliver_later
     end
+    redirect_to check_email_session_path, flash: { email: email }
+  end
+
+  def check_email
+    @email = flash[:email]
   end
 
   def destroy

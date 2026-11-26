@@ -25,7 +25,7 @@ class BorrowRequestTest < ActiveSupport::TestCase
 
   test "cannot approve a second loan while tool is out" do
     borrow_requests(:pending_drill).approve!
-    other = User.create!(name: "Three", email_address: "three@example.com", password: "password123")
+    other = User.create!(name: "Three", email_address: "three@example.com", webauthn_id: "three")
     second = tools(:drill).borrow_requests.create!(borrower: other, start_date: Date.current, due_date: Date.current + 1)
     assert_raises(ActiveRecord::RecordInvalid) { second.approve! }
   end

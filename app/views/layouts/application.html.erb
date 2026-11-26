@@ -21,6 +21,7 @@
           <%= link_to "Browse tools", root_path %>
           <% if authenticated? %>
             <%= link_to "My dashboard", dashboard_path %>
+            <%= link_to "Account", account_path %>
             <%= link_to "+ Add tool", new_tool_path, class: "btn btn-small" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "linklike" %>
           <% else %>

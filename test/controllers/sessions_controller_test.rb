@@ -1,32 +1,35 @@
 require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
-  setup { @user = User.take }
+  include ActionMailer::TestHelper
 
   test "new" do
     get new_session_path
     assert_response :success
+    assert_select "button", /passkey/
   end
 
-  test "create with valid credentials" do
-    post session_path, params: { email_address: @user.email_address, password: "password" }
-
-    assert_redirected_to root_path
-    assert cookies[:session_id]
+  test "known email gets a magic link" do
+    assert_enqueued_email_with AuthMailer, :magic_link, args: [ users(:one) ] do
+      post session_path, params: { email_address: " ONE@example.com " }
+    end
+    assert_redirected_to check_email_session_path
+    follow_redirect!
+    assert_select "h1", /Check your email/
   end
 
-  test "create with invalid credentials" do
-    post session_path, params: { email_address: @user.email_address, password: "wrong" }
-
-    assert_redirected_to new_session_path
-    assert_nil cookies[:session_id]
+  test "unknown email gets the same page but no email" do
+    assert_no_enqueued_emails do
+      post session_path, params: { email_address: "nobody@example.com" }
+    end
+    assert_redirected_to check_email_session_path
+    follow_redirect!
+    assert_select "h1", /Check your email/
   end
 
   test "destroy" do
-    sign_in_as(User.take)
-
+    sign_in_as users(:one)
     delete session_path
-
     assert_redirected_to root_path
     assert_empty cookies[:session_id]
   end

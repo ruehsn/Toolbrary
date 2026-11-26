@@ -1,11 +1,10 @@
 <% content_for :title, "Sign up · Tool Share" %>
 <h1>Create your account</h1>
 <%= form_with model: @user, url: registration_path, class: "card narrow" do |f| %>
+  <p class="small muted" style="margin-top:0">No password needed. We'll email you a link to confirm, then you can add a passkey for one-tap sign-in.</p>
   <%= render "shared/errors", record: @user %>
   <div class="field"><%= f.label :name, "Your name" %><%= f.text_field :name, required: true, autofocus: true %></div>
-  <div class="field"><%= f.label :email_address, "Email" %><%= f.email_field :email_address, required: true, autocomplete: "username" %></div>
-  <div class="field"><%= f.label :password %><%= f.password_field :password, required: true, autocomplete: "new-password", minlength: 8 %></div>
-  <div class="field"><%= f.label :password_confirmation %><%= f.password_field :password_confirmation, required: true, autocomplete: "new-password" %></div>
-  <%= f.submit "Sign up" %>
+  <div class="field"><%= f.label :email_address, "Email" %><%= f.email_field :email_address, required: true, autocomplete: "email" %></div>
+  <%= f.submit "Email me a link", class: "btn btn-block" %>
   <p class="small">Already have an account? <%= link_to "Sign in", new_session_path %></p>
 <% end %>

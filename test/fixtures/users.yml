@@ -1,11 +1,9 @@
-<% password_digest = BCrypt::Password.create("password") %>
-
 one:
   name: Owner One
   email_address: one@example.com
-  password_digest: <%= password_digest %>
+  webauthn_id: user-one-handle
 
 two:
   name: Borrower Two
   email_address: two@example.com
-  password_digest: <%= password_digest %>
+  webauthn_id: user-two-handle

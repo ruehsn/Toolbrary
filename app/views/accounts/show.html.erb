@@ -1,0 +1,53 @@
+<% content_for :title, "Account · Tool Share" %>
+<h1>Your account</h1>
+
+<div class="two-col">
+  <section class="card" style="margin-top:0">
+    <h2 style="margin-top:0">🔑 Passkeys</h2>
+    <p class="small muted">Passkeys let you sign in with your fingerprint, face, device PIN or a security key, with no email round-trip. Add one on each device you use.</p>
+
+    <% if @passkeys.any? %>
+      <div class="table-wrap"><table>
+        <tr><th>Name</th><th>Added</th><th>Last used</th><th></th></tr>
+        <% @passkeys.each do |pk| %>
+          <tr>
+            <td>
+              <%= form_with model: pk, url: passkey_path(pk), method: :patch, class: "inline-form" do |f| %>
+                <%= f.text_field :nickname, value: pk.nickname, placeholder: pk.display_name, "aria-label": "Passkey name" %>
+                <%= f.submit "Rename", class: "btn btn-small btn-ghost" %>
+              <% end %>
+            </td>
+            <td class="small"><%= l pk.created_at.to_date, format: :short %></td>
+            <td class="small"><%= pk.last_used_at ? "#{time_ago_in_words(pk.last_used_at)} ago" : "Never" %></td>
+            <td><%= button_to "Remove", passkey_path(pk), method: :delete, class: "btn btn-small btn-danger",
+                      form: { data: { turbo_confirm: "Remove this passkey? You can still sign in by email." } } %></td>
+          </tr>
+        <% end %>
+      </table></div>
+    <% else %>
+      <p class="empty">No passkeys yet. You're signing in with email links.</p>
+    <% end %>
+
+    <div data-controller="passkey"
+         data-passkey-options-url-value="<%= options_passkeys_path %>"
+         data-passkey-submit-url-value="<%= passkeys_path %>"
+         class="add-passkey">
+      <label for="passkey_nickname">Add a passkey on this device</label>
+      <div class="inline-form">
+        <input type="text" id="passkey_nickname" data-passkey-target="nickname" placeholder="e.g. My iPhone" maxlength="60">
+        <button type="button" class="btn" data-passkey-target="button" data-action="passkey#register">Add passkey</button>
+      </div>
+      <p class="field-error" data-passkey-target="error" hidden></p>
+    </div>
+  </section>
+
+  <aside class="card">
+    <h3 style="margin-top:0">Profile</h3>
+    <%= form_with model: @user, url: account_path, method: :patch do |f| %>
+      <%= render "shared/errors", record: @user %>
+      <div class="field"><%= f.label :name %><%= f.text_field :name, required: true %></div>
+      <div class="field"><label>Email</label><p class="small" style="margin:0"><%= @user.email_address %></p></div>
+      <%= f.submit "Save" %>
+    <% end %>
+  </aside>
+</div>
