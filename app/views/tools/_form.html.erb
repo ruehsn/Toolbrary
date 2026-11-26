@@ -1,0 +1,8 @@
+<%= form_with model: tool, class: "card narrow" do |f| %>
+  <%= render "shared/errors", record: tool %>
+  <div class="field"><%= f.label :name %><%= f.text_field :name, required: true, placeholder: "e.g. Cordless drill (18V)" %></div>
+  <div class="field"><%= f.label :category %><%= f.select :category, Tool::CATEGORIES, include_blank: "Choose…" %></div>
+  <div class="field"><%= f.label :condition %><%= f.select :condition, Tool::CONDITIONS, include_blank: "Choose…" %></div>
+  <div class="field"><%= f.label :description, "Description / notes for borrowers" %><%= f.text_area :description, rows: 4, placeholder: "Comes with 2 batteries and a charger. Please return clean." %></div>
+  <div class="actions"><%= f.submit %> <%= link_to "Cancel", tool.persisted? ? tool : dashboard_path, class: "btn btn-ghost" %></div>
+<% end %>

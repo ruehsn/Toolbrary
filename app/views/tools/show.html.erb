@@ -1,0 +1,46 @@
+<% content_for :title, "#{@tool.name} · Tool Share" %>
+<p><%= link_to "← All tools", root_path %></p>
+<div class="two-col">
+  <div class="card">
+    <h1 style="margin-top:0"><%= @tool.name %></h1>
+    <p><%= render "tools/status", tool: @tool %></p>
+    <p class="muted">
+      <%= @tool.category.presence || "Uncategorised" %>
+      <%= " · Condition: #{@tool.condition}" if @tool.condition.present? %>
+      · Owned by <%= link_to @tool.user.name, @tool.user %>
+    </p>
+    <%= simple_format(@tool.description) if @tool.description.present? %>
+
+    <% if @tool.owned_by?(Current.user) %>
+      <div class="actions">
+        <%= link_to "Edit", edit_tool_path(@tool), class: "btn btn-ghost" %>
+        <%= button_to "Delete", @tool, method: :delete, class: "btn btn-danger", form: { data: { turbo_confirm: "Remove #{@tool.name}?" } } %>
+      </div>
+    <% end %>
+  </div>
+
+  <aside class="card">
+    <% if @tool.owned_by?(Current.user) %>
+      <h3 style="margin-top:0">This is your tool</h3>
+      <p class="small muted">Requests from borrowers appear on your <%= link_to "dashboard", dashboard_path %>.</p>
+    <% elsif !authenticated? %>
+      <h3 style="margin-top:0">Want to borrow it?</h3>
+      <p><%= link_to "Sign in", new_session_path %> or <%= link_to "create an account", new_registration_path %> to send a request.</p>
+    <% elsif @my_open_request %>
+      <h3 style="margin-top:0">Your request</h3>
+      <p><span class="badge <%= @my_open_request.status %>"><%= @my_open_request.status.capitalize %></span>
+         <%= l @my_open_request.start_date, format: :short %> – <%= l @my_open_request.due_date, format: :short %></p>
+      <% if @my_open_request.pending? %>
+        <%= button_to "Cancel request", cancel_borrow_request_path(@my_open_request), method: :patch, class: "btn btn-ghost" %>
+      <% end %>
+    <% else %>
+      <h3 style="margin-top:0">Request to borrow</h3>
+      <%= form_with model: [@tool, @borrow_request] do |f| %>
+        <div class="field"><%= f.label :start_date, "From" %><%= f.date_field :start_date, required: true %></div>
+        <div class="field"><%= f.label :due_date, "Return by" %><%= f.date_field :due_date, required: true %></div>
+        <div class="field"><%= f.label :message, "Message to #{@tool.user.name}" %><%= f.text_area :message, rows: 3, placeholder: "Hi! Could I borrow this for the weekend?" %></div>
+        <%= f.submit "Send request" %>
+      <% end %>
+    <% end %>
+  </aside>
+</div>

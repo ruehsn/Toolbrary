@@ -1,0 +1,78 @@
+<% content_for :title, "Dashboard · Tool Share" %>
+<h1>Hi, <%= Current.user.name %></h1>
+<p class="muted">Your public shed page: <%= link_to user_url(Current.user), Current.user %> — share it so others can see what you lend.</p>
+
+<section>
+  <h2>Requests waiting for you (<%= @incoming.size %>)</h2>
+  <% if @incoming.any? %>
+    <div class="card table-wrap"><table>
+      <tr><th>Tool</th><th>Who</th><th>Dates</th><th>Message</th><th></th></tr>
+      <% @incoming.each do |r| %>
+        <tr>
+          <td><%= link_to r.tool.name, r.tool %></td>
+          <td><%= r.borrower.name %><br><span class="small muted"><%= mail_to r.borrower.email_address %></span></td>
+          <td class="small"><%= l r.start_date, format: :short %> – <%= l r.due_date, format: :short %></td>
+          <td class="small"><%= r.message %></td>
+          <td><div class="actions">
+            <%= button_to "Approve", approve_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ok" %>
+            <%= button_to "Decline", decline_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ghost" %>
+          </div></td>
+        </tr>
+      <% end %>
+    </table></div>
+  <% else %>
+    <p class="empty">No pending requests.</p>
+  <% end %>
+</section>
+
+<section>
+  <h2>Currently lent out</h2>
+  <% if @lent_out.any? %>
+    <div class="card table-wrap"><table>
+      <tr><th>Tool</th><th>Borrower</th><th>Due back</th><th></th></tr>
+      <% @lent_out.each do |r| %>
+        <tr>
+          <td><%= link_to r.tool.name, r.tool %></td>
+          <td><%= r.borrower.name %><br><span class="small muted"><%= mail_to r.borrower.email_address %></span></td>
+          <td><%= l r.due_date, format: :short %> <% if r.overdue? %><span class="badge overdue">Overdue</span><% end %></td>
+          <td><%= button_to "Mark returned", return_borrow_request_path(r), method: :patch, class: "btn btn-small" %></td>
+        </tr>
+      <% end %>
+    </table></div>
+  <% else %>
+    <p class="empty">Nothing is out right now.</p>
+  <% end %>
+</section>
+
+<section>
+  <div class="actions" style="justify-content:space-between">
+    <h2>My tools (<%= @tools.size %>)</h2>
+    <%= link_to "+ Add tool", new_tool_path, class: "btn" %>
+  </div>
+  <% if @tools.any? %>
+    <div class="grid"><%= render @tools %></div>
+  <% else %>
+    <p class="empty">You haven't added any tools yet.</p>
+  <% end %>
+</section>
+
+<section>
+  <h2>Things I've asked to borrow</h2>
+  <% if @my_requests.any? %>
+    <div class="card table-wrap"><table>
+      <tr><th>Tool</th><th>Owner</th><th>Dates</th><th>Status</th><th></th></tr>
+      <% @my_requests.each do |r| %>
+        <tr>
+          <td><%= link_to r.tool.name, r.tool %></td>
+          <td><%= link_to r.owner.name, r.owner %>
+            <% if r.approved? %><br><span class="small muted"><%= mail_to r.owner.email_address %></span><% end %></td>
+          <td class="small"><%= l r.start_date, format: :short %> – <%= l r.due_date, format: :short %></td>
+          <td><span class="badge <%= r.overdue? ? "overdue" : r.status %>"><%= r.overdue? ? "Overdue" : r.status.capitalize %></span></td>
+          <td><% if r.pending? %><%= button_to "Cancel", cancel_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ghost" %><% end %></td>
+        </tr>
+      <% end %>
+    </table></div>
+  <% else %>
+    <p class="empty">You haven't requested anything yet. <%= link_to "Browse tools", root_path %>.</p>
+  <% end %>
+</section>

@@ -1,0 +1,11 @@
+drill:
+  user: one
+  name: Cordless drill
+  description: Comes with charger
+  category: Power tools
+  condition: Good
+
+ladder:
+  user: one
+  name: Ladder
+  category: Ladders & access

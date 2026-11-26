@@ -1,0 +1,7 @@
+pending_drill:
+  tool: drill
+  borrower: two
+  status: pending
+  message: Weekend project
+  start_date: <%= Date.current %>
+  due_date: <%= Date.current + 3 %>

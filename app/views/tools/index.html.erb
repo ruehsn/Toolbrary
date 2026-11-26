@@ -1,0 +1,16 @@
+<% content_for :title, "Browse tools · Tool Share" %>
+<h1>Tools you can borrow</h1>
+<p class="muted">See what your neighbours have in their sheds, then send a request to borrow it.</p>
+
+<%= form_with url: root_path, method: :get, class: "filters" do |f| %>
+  <%= f.search_field :q, value: params[:q], placeholder: "Search drills, ladders, saws…" %>
+  <%= f.select :category, options_for_select(Tool::CATEGORIES, params[:category]), include_blank: "All categories" %>
+  <span class="check"><%= f.check_box :available, { checked: params[:available] == "1" }, "1", nil %> <%= f.label :available, "Available now" %></span>
+  <%= f.submit "Search", name: nil %>
+<% end %>
+
+<% if @tools.any? %>
+  <div class="grid"><%= render @tools %></div>
+<% else %>
+  <p class="empty">No tools match. <%= link_to "Add one of yours", new_tool_path %>.</p>
+<% end %>

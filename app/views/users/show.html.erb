@@ -1,0 +1,8 @@
+<% content_for :title, "#{@user.name}'s shed · Tool Share" %>
+<h1><%= @user.name %>'s shed</h1>
+<p class="muted"><%= pluralize(@tools.size, "tool") %> to share.</p>
+<% if @tools.any? %>
+  <div class="grid"><%= render @tools %></div>
+<% else %>
+  <p class="empty">No tools listed yet.</p>
+<% end %>

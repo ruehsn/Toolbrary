@@ -1,0 +1,71 @@
+:root {
+  --bg: #f6f5f1; --card: #fff; --ink: #1f2328; --muted: #656d76; --line: #e3e1da;
+  --accent: #c2410c; --accent-ink: #fff; --ok: #15803d; --ok-bg: #dcfce7;
+  --warn: #a16207; --warn-bg: #fef3c7; --bad: #b91c1c; --bad-bg: #fee2e2;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+a { color: var(--accent); }
+h1, h2, h3 { line-height: 1.2; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+main.wrap { padding-bottom: 48px; }
+
+.topbar { background: var(--ink); color: #fff; }
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.topbar a, .topbar .linklike { color: #fff; text-decoration: none; }
+.brand { font-weight: 700; font-size: 1.15rem; }
+nav { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+nav form { display: inline; margin: 0; }
+
+.btn, button, input[type=submit] {
+  display: inline-block; background: var(--accent); color: var(--accent-ink) !important; border: 0;
+  border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.btn-small { padding: 5px 12px; font-size: .9rem; }
+.btn-ghost { background: transparent; color: var(--ink) !important; border: 1px solid var(--line); }
+.btn-danger { background: var(--bad); }
+.btn-ok { background: var(--ok); }
+.linklike { background: none; border: 0; padding: 0; font: inherit; font-weight: normal; cursor: pointer; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.actions form { margin: 0; }
+
+.flash { padding: 10px 14px; border-radius: 8px; margin: 16px 0; }
+.flash.notice { background: var(--ok-bg); color: var(--ok); }
+.flash.alert { background: var(--bad-bg); color: var(--bad); }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.tool-card { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; }
+.tool-card:hover { border-color: var(--accent); }
+.tool-card h3 { margin: 0; font-size: 1.05rem; }
+.muted { color: var(--muted); }
+.small { font-size: .875rem; }
+
+.badge { display: inline-block; font-size: .78rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #eee; color: var(--muted); }
+.badge.available, .badge.approved { background: var(--ok-bg); color: var(--ok); }
+.badge.lent, .badge.pending { background: var(--warn-bg); color: var(--warn); }
+.badge.overdue, .badge.declined { background: var(--bad-bg); color: var(--bad); }
+
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 16px 0 20px; }
+.filters input[type=search] { flex: 1 1 220px; }
+
+form .field { margin-bottom: 14px; }
+label { display: block; font-weight: 600; margin-bottom: 4px; }
+.check label { display: inline; font-weight: normal; }
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=date], select, textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff;
+}
+.filters select, .filters input[type=search] { width: auto; }
+.narrow { max-width: 480px; }
+.errors { background: var(--bad-bg); color: var(--bad); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; }
+.errors ul { margin: 4px 0 0; padding-left: 20px; }
+
+.two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+section { margin-top: 28px; }
+.empty { color: var(--muted); font-style: italic; }
