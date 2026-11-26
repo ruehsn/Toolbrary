@@ -12,6 +12,10 @@ Rails.application.routes.draw do
     post :options, on: :collection
   end
   resource :account, only: %i[show update]
+  resources :api_tokens, only: %i[create destroy]
+
+  # MCP server for AI assistants (see app/mcp)
+  match "mcp", to: "mcp#handle", via: %i[get post delete]
 
   resources :tools do
     resources :borrow_requests, only: :create

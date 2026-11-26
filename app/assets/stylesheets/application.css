@@ -116,3 +116,16 @@ details summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .import-item:has(.include input:not(:checked)) { opacity: .5; }
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* MCP / AI assistants */
+pre { background: #1f2328; color: #e6edf3; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: .82rem; line-height: 1.45; }
+pre.token { font-size: 1rem; user-select: all; }
+.setup h4 { margin: 16px 0 6px; }
+blockquote { margin: 8px 0; padding: 8px 14px; border-left: 3px solid var(--accent); background: #fff7ed; border-radius: 0 8px 8px 0; }
+fieldset.choice { border: 0; padding: 0; margin: 0 0 14px; }
+fieldset.choice legend { font-weight: 600; margin-bottom: 6px; }
+fieldset.choice label { display: flex; gap: 10px; align-items: flex-start; font-weight: normal; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+fieldset.choice label:has(input:checked) { border-color: var(--accent); background: #fff7ed; }
+fieldset.choice label.disabled { opacity: .55; cursor: not-allowed; }
+fieldset.choice input { margin-top: 4px; }
+section#ai-assistants { margin-top: 24px; }

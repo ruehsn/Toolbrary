@@ -11,7 +11,7 @@ class AnalyzeToolImportJob < ApplicationJob
       analyzer.analyze(photo.blob).map { |item| item.merge("photo_index" => index) }
     end
 
-    tool_import.update!(status: "ready", items: items, error: nil)
+    tool_import.accept_items!(items)
   rescue ToolPhotoAnalyzer::Error => e
     tool_import.update!(status: "failed", error: e.message)
   end

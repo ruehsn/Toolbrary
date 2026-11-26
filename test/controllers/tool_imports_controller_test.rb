@@ -14,7 +14,7 @@ class ToolImportsControllerTest < ActionDispatch::IntegrationTest
 
   def upload_and_analyze
     perform_enqueued_jobs do
-      post tool_imports_path, params: { tool_import: { photos: [ fixture_file_upload("bench.jpg", "image/jpeg") ] } }
+      post tool_imports_path, params: { tool_import: { analysis: "builtin", photos: [ fixture_file_upload("bench.jpg", "image/jpeg") ] } }
     end
     ToolImport.last
   end
@@ -72,6 +72,24 @@ class ToolImportsControllerTest < ActionDispatch::IntegrationTest
     assert import.reload.failed?
     get tool_import_path(import)
     assert_select ".flash", /busy/
+  end
+
+  test "choosing my own assistant waits for MCP instead of running the built-in AI" do
+    sign_in_as users(:one)
+    assert_no_enqueued_jobs(only: AnalyzeToolImportJob) do
+      post tool_imports_path, params: { tool_import: { analysis: "assistant", photos: [ fixture_file_upload("bench.jpg", "image/jpeg") ] } }
+    end
+    import = ToolImport.last
+    assert import.awaiting_assistant?
+    follow_redirect!
+    assert_select "strong", "Waiting for your AI assistant"
+  end
+
+  test "built-in choice falls back to the assistant when no AI is configured" do
+    ToolPhotoAnalyzer.stub = nil
+    sign_in_as users(:one)
+    post tool_imports_path, params: { tool_import: { analysis: "builtin", photos: [ fixture_file_upload("bench.jpg", "image/jpeg") ] } }
+    assert ToolImport.last.awaiting_assistant?
   end
 
   test "rejects non-images" do

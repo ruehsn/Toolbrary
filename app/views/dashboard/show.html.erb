@@ -37,7 +37,7 @@
       <tr>
         <td><%= link_to "Import from #{time_ago_in_words(imp.created_at)} ago", imp %></td>
         <td><%= pluralize(imp.photos.size, "photo") %></td>
-        <td><%= { "pending" => "Waiting…", "processing" => "Analysing…", "ready" => "Ready to review (#{imp.items.size} found)", "failed" => "Failed" }[imp.status] %></td>
+        <td><%= { "awaiting_assistant" => "Waiting for your AI assistant", "pending" => "Waiting…", "processing" => "Analysing…", "ready" => "Ready to review (#{imp.items.size} found)", "failed" => "Failed" }[imp.status] %></td>
       </tr>
     <% end %>
   </table></div>

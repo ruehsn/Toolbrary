@@ -1,8 +1,11 @@
 # A batch of photos the user uploads so AI can find each tool in them and
 # draft a listing (name, category, condition, description and a crop box).
-# Lifecycle: pending -> processing -> ready -> completed, or -> failed.
+# Lifecycle:
+#   built-in AI:          pending -> processing -> ready -> completed (or -> failed)
+#   user's own assistant: awaiting_assistant -> ready -> completed
+#     (the assistant reads the photos and submits items over MCP; see app/mcp)
 class ToolImport < ApplicationRecord
-  STATUSES = %w[pending processing ready completed failed].freeze
+  STATUSES = %w[awaiting_assistant pending processing ready completed failed].freeze
   MAX_PHOTOS = 10
 
   belongs_to :user
@@ -14,6 +17,29 @@ class ToolImport < ApplicationRecord
   STATUSES.each { |s| define_method("#{s}?") { status == s } }
 
   def working? = pending? || processing?
+
+  scope :awaiting_assistant, -> { where(status: "awaiting_assistant") }
+
+  # Validates and stores items proposed by an AI (built-in or the user's assistant).
+  # Each item: name, category, condition, description, box [x0,y0,x1,y1] on 0..1000, photo_index.
+  def accept_items!(raw_items)
+    items = Array(raw_items).filter_map do |raw|
+      raw = raw.to_h.stringify_keys
+      index = Integer(raw["photo_index"] || 0, exception: false)
+      next if raw["name"].blank? || index.nil? || index.negative? || index >= photos.size
+      box = Array(raw["box"]).map { |v| Integer(v, exception: false) || Float(v, exception: false) }
+      {
+        "photo_index" => index,
+        "name" => raw["name"].to_s.squish.first(100),
+        "category" => raw["category"].to_s.squish.first(40),
+        "condition" => Tool::CONDITIONS.find { |c| c.casecmp?(raw["condition"].to_s) },
+        "description" => raw["description"].to_s.strip.first(1000),
+        "box" => (box.size == 4 && box.none?(&:nil?) ? box : nil)
+      }
+    end
+    update!(status: "ready", items: items, error: nil)
+    items
+  end
 
   # items: [{ "photo_index"=>0, "name"=>..., "category"=>..., "condition"=>...,
   #           "description"=>..., "box"=>[x_min, y_min, x_max, y_max] (0..1000) }]

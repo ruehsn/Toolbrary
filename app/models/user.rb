@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :passkeys, dependent: :destroy
   has_many :tools, dependent: :destroy
   has_many :tool_imports, dependent: :destroy
+  has_many :api_tokens, dependent: :destroy
   has_many :borrow_requests, foreign_key: :borrower_id, dependent: :destroy, inverse_of: :borrower
   has_many :incoming_requests, through: :tools, source: :borrow_requests
 

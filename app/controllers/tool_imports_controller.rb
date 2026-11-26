@@ -6,10 +6,11 @@ class ToolImportsController < ApplicationController
   end
 
   def create
-    @tool_import = Current.user.tool_imports.new
+    builtin = params.dig(:tool_import, :analysis) == "builtin" && ToolPhotoAnalyzer.configured?
+    @tool_import = Current.user.tool_imports.new(status: builtin ? "pending" : "awaiting_assistant")
     @tool_import.photos.attach(Array(params.dig(:tool_import, :photos)).compact_blank)
     if @tool_import.save
-      AnalyzeToolImportJob.perform_later(@tool_import)
+      AnalyzeToolImportJob.perform_later(@tool_import) if builtin
       redirect_to @tool_import
     else
       render :new, status: :unprocessable_entity

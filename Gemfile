@@ -62,3 +62,5 @@ gem "anthropic", "~> 2.14"
 gem "image_processing", "~> 2.2"
 
 gem "ruby-vips", "~> 2.3"
+
+gem "mcp", "~> 1.11"
