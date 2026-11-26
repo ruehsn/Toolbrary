@@ -1,0 +1,11 @@
+power:
+  name: Power tools
+  icon: ⚡
+
+ladders:
+  name: Ladders & access
+  icon: 🪜
+
+other:
+  name: Other
+  icon: 📦

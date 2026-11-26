@@ -36,3 +36,18 @@ class BorrowRequestTest < ActiveSupport::TestCase
     assert r.overdue?
   end
 end
+
+class OfflineLoanTest < ActiveSupport::TestCase
+  test "owner can check out to a named non-member" do
+    loan = tools(:ladder).borrow_requests.create!(status: "approved", borrower_name: "Grandpa Joe",
+                                                 start_date: Date.current, due_date: Date.current + 3)
+    assert_equal "Grandpa Joe", loan.borrower_display_name
+    assert loan.checked_out_at.present?
+    assert_not tools(:ladder).reload.available?
+  end
+
+  test "needs either a member or a name" do
+    loan = tools(:ladder).borrow_requests.new(status: "approved", start_date: Date.current, due_date: Date.current)
+    assert_not loan.valid?
+  end
+end

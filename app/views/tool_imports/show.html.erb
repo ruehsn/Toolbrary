@@ -1,0 +1,67 @@
+<% content_for :title, "Photo import · Tool Share" %>
+<% if @tool_import.working? %>
+  <% content_for :head do %><meta http-equiv="refresh" content="3"><% end %>
+<% end %>
+<h1>📷 Photo import</h1>
+
+<% if @tool_import.working? %>
+  <div class="card narrow">
+    <p style="margin-top:0"><span class="spinner" aria-hidden="true"></span> <strong>Looking for tools in <%= pluralize(@tool_import.photos.size, "photo") %>…</strong></p>
+    <p class="small muted">This usually takes 10–30 seconds per photo. This page refreshes by itself.</p>
+    <div class="photo-strip">
+      <% @tool_import.photos.each do |p| %><%= image_tag p.variant(resize_to_limit: [160, 160], format: :webp), alt: "" %><% end %>
+    </div>
+  </div>
+
+<% elsif @tool_import.failed? %>
+  <div class="card narrow">
+    <p class="flash alert" style="margin-top:0"><%= @tool_import.error %></p>
+    <div class="actions">
+      <%= link_to "Try other photos", new_tool_import_path, class: "btn" %>
+      <%= button_to "Discard", @tool_import, method: :delete, class: "btn btn-ghost" %>
+    </div>
+  </div>
+
+<% elsif @tool_import.completed? %>
+  <p>These tools have been added. <%= link_to "Go to your dashboard", dashboard_path %>.</p>
+
+<% elsif @tool_import.items.empty? %>
+  <div class="card narrow">
+    <p style="margin-top:0">No tools were found in these photos. Try closer shots with the tools spread out.</p>
+    <div class="actions">
+      <%= link_to "Try other photos", new_tool_import_path, class: "btn" %>
+      <%= button_to "Discard", @tool_import, method: :delete, class: "btn btn-ghost" %>
+    </div>
+  </div>
+
+<% else %>
+  <p class="muted">Found <strong><%= pluralize(@tool_import.items.size, "tool") %></strong>. Check the details, untick anything you don't want to share, then add them.</p>
+  <%= form_with url: confirm_tool_import_path(@tool_import), method: :post do %>
+    <div class="import-grid">
+      <% @tool_import.items.each_with_index do |item, i| %>
+        <% field = ->(name) { "items[#{i}][#{name}]" } %>
+        <% category = @categories.find { |c| c.name.casecmp?(item["category"].to_s) } %>
+        <div class="card import-item">
+          <label class="include">
+            <%= hidden_field_tag field["include"], "0", id: nil %>
+            <%= check_box_tag field["include"], "1", true, id: "include_#{i}" %> Add this tool
+          </label>
+          <% if (preview = @tool_import.item_preview(item)) %>
+            <%= image_tag preview, alt: item["name"], class: "import-thumb" %>
+          <% end %>
+          <%= hidden_field_tag field["index"], i, id: nil %>
+          <div class="field"><label for="name_<%= i %>">Name</label><%= text_field_tag field["name"], item["name"], id: "name_#{i}", required: true, maxlength: 100 %></div>
+          <div class="field"><label for="category_<%= i %>">Category</label>
+            <%= select_tag field["category_id"], options_from_collection_for_select(@categories, :id, :label, category&.id), include_blank: "Uncategorised", id: "category_#{i}" %></div>
+          <div class="field"><label for="condition_<%= i %>">Condition</label>
+            <%= select_tag field["condition"], options_for_select(Tool::CONDITIONS, item["condition"]), include_blank: "—", id: "condition_#{i}" %></div>
+          <div class="field"><label for="description_<%= i %>">Description</label><%= text_area_tag field["description"], item["description"], rows: 3, id: "description_#{i}" %></div>
+        </div>
+      <% end %>
+    </div>
+    <div class="actions" style="margin-top:20px">
+      <%= submit_tag "Add selected tools", class: "btn", data: { turbo_submits_with: "Adding…" } %>
+      <%= link_to "Discard all", tool_import_path(@tool_import), class: "btn btn-ghost", data: { turbo_method: :delete, turbo_confirm: "Discard this import?" } %>
+    </div>
+  <% end %>
+<% end %>

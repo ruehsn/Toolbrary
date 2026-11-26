@@ -4,6 +4,6 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
-    @tools = @user.tools.includes(:borrow_requests).order(:name)
+    @tools = @user.tools.includes(:user, :category, :borrow_requests, photos_attachments: :blob).order(:name)
   end
 end

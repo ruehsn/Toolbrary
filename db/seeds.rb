@@ -1,4 +1,6 @@
 # Demo data: bin/rails db:seed   (sign in via email link; see /letter_opener in development)
+Category.create_defaults!
+
 alice = User.find_or_create_by!(email_address: "alice@example.com") { |u| u.name = "Alice" }
 bob   = User.find_or_create_by!(email_address: "bob@example.com")   { |u| u.name = "Bob" }
 
@@ -10,7 +12,10 @@ bob   = User.find_or_create_by!(email_address: "bob@example.com")   { |u| u.name
   [ bob,   "Pipe wrench set", "Plumbing", "Worn", nil ],
   [ bob,   "Laser level", "Measuring", "Good", "Takes 2x AA batteries." ]
 ].each do |owner, name, category, condition, description|
-  owner.tools.find_or_create_by!(name: name) { |t| t.assign_attributes(category:, condition:, description:) }
+  owner.tools.find_or_create_by!(name: name) do |t|
+    t.assign_attributes(category: Category.find_or_create_by_name(category), condition:, description:,
+                        replacement_url: (name == "Laser level" ? "https://www.example.com/laser-level" : nil))
+  end
 end
 
 ladder = Tool.find_by!(name: "Extension ladder 6m")

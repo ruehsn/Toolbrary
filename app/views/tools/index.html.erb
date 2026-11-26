@@ -1,10 +1,21 @@
 <% content_for :title, "Browse tools · Tool Share" %>
-<h1>Tools you can borrow</h1>
+<h1><%= @category ? "#{@category.label}" : "Tools you can borrow" %></h1>
 <p class="muted">See what your neighbours have in their sheds, then send a request to borrow it.</p>
 
+<nav class="chips" aria-label="Categories">
+  <%= link_to "All", root_path(q: params[:q], available: params[:available]), class: ["chip", ("active" unless @category)] %>
+  <% @categories.each do |c| %>
+    <% next if c.tools_count.zero? && c != @category %>
+    <%= link_to root_path(category: c.to_param, q: params[:q], available: params[:available]), class: ["chip", ("active" if c == @category)] do %>
+      <%= c.label %> <span class="count"><%= c.tools_count %></span>
+    <% end %>
+  <% end %>
+  <%= link_to "All categories →", categories_path, class: "chip ghost" %>
+</nav>
+
 <%= form_with url: root_path, method: :get, class: "filters" do |f| %>
+  <%= hidden_field_tag :category, @category&.to_param if @category %>
   <%= f.search_field :q, value: params[:q], placeholder: "Search drills, ladders, saws…" %>
-  <%= f.select :category, options_for_select(Tool::CATEGORIES, params[:category]), include_blank: "All categories" %>
   <span class="check"><%= f.check_box :available, { checked: params[:available] == "1" }, "1", nil %> <%= f.label :available, "Available now" %></span>
   <%= f.submit "Search", name: nil %>
 <% end %>
@@ -12,5 +23,5 @@
 <% if @tools.any? %>
   <div class="grid"><%= render @tools %></div>
 <% else %>
-  <p class="empty">No tools match. <%= link_to "Add one of yours", new_tool_path %>.</p>
+  <p class="empty">No tools match. <%= link_to "Add one of yours", new_tool_path(category_id: @category&.id) %>.</p>
 <% end %>

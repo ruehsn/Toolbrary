@@ -1,0 +1,25 @@
+<% content_for :title, "Categories · Tool Share" %>
+<h1>Categories</h1>
+<div class="grid cat-grid">
+  <% @categories.each do |c| %>
+    <%= link_to root_path(category: c.to_param), class: "card cat-card" do %>
+      <span class="cat-icon"><%= c.icon.presence || "🧰" %></span>
+      <strong><%= c.name %></strong>
+      <span class="small muted"><%= pluralize(c.tools_count, "tool") %></span>
+    <% end %>
+  <% end %>
+</div>
+
+<% if authenticated? %>
+  <section>
+    <h2>Add a category</h2>
+    <%= form_with model: @category, class: "card narrow" do |f| %>
+      <%= render "shared/errors", record: @category %>
+      <div class="inline-form">
+        <%= f.text_field :icon, placeholder: "🧰", maxlength: 8, style: "max-width:70px", "aria-label": "Icon (emoji)" %>
+        <%= f.text_field :name, placeholder: "e.g. Bike repair", required: true, maxlength: 40, "aria-label": "Name" %>
+        <%= f.submit "Add" %>
+      </div>
+    <% end %>
+  </section>
+<% end %>

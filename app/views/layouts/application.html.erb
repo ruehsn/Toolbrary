@@ -19,6 +19,7 @@
         <%= link_to "🔧 Tool Share", root_path, class: "brand" %>
         <nav>
           <%= link_to "Browse tools", root_path %>
+          <%= link_to "Categories", categories_path %>
           <% if authenticated? %>
             <%= link_to "My dashboard", dashboard_path %>
             <%= link_to "Account", account_path %>

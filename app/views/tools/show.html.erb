@@ -1,18 +1,34 @@
 <% content_for :title, "#{@tool.name} · Tool Share" %>
-<p><%= link_to "← All tools", root_path %></p>
+<p><%= link_to "← All tools", root_path %><% if @tool.category %> · <%= link_to @tool.category.label, root_path(category: @tool.category.to_param) %><% end %></p>
 <div class="two-col">
   <div class="card">
+    <% if @tool.photos.attached? %>
+      <div class="gallery">
+        <% @tool.photos.each do |photo| %>
+          <%= link_to url_for(photo), target: "_blank", rel: "noopener" do %>
+            <%= image_tag photo.variant(:large), alt: @tool.name, loading: "lazy" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
     <h1 style="margin-top:0"><%= @tool.name %></h1>
     <p><%= render "tools/status", tool: @tool %></p>
     <p class="muted">
-      <%= @tool.category.presence || "Uncategorised" %>
+      <%= @tool.category&.label || "Uncategorised" %>
       <%= " · Condition: #{@tool.condition}" if @tool.condition.present? %>
       · Owned by <%= link_to @tool.user.name, @tool.user %>
     </p>
     <%= simple_format(@tool.description) if @tool.description.present? %>
 
+    <div class="actions replacement">
+      <% if @tool.replacement_url.present? %>
+        <%= link_to "🛒 Buy a replacement", @tool.replacement_url, class: "btn btn-ghost", target: "_blank", rel: "noopener noreferrer nofollow" %>
+      <% end %>
+      <%= link_to "Search for a replacement", @tool.replacement_search_url, class: "small", target: "_blank", rel: "noopener noreferrer nofollow" %>
+    </div>
+
     <% if @tool.owned_by?(Current.user) %>
-      <div class="actions">
+      <div class="actions" style="margin-top:16px">
         <%= link_to "Edit", edit_tool_path(@tool), class: "btn btn-ghost" %>
         <%= button_to "Delete", @tool, method: :delete, class: "btn btn-danger", form: { data: { turbo_confirm: "Remove #{@tool.name}?" } } %>
       </div>
@@ -21,14 +37,29 @@
 
   <aside class="card">
     <% if @tool.owned_by?(Current.user) %>
-      <h3 style="margin-top:0">This is your tool</h3>
-      <p class="small muted">Requests from borrowers appear on your <%= link_to "dashboard", dashboard_path %>.</p>
+      <% if (loan = @tool.current_loan) %>
+        <h3 style="margin-top:0">Checked out</h3>
+        <p><strong><%= loan.borrower_display_name %></strong> has it<% if loan.checked_out_at %> since <%= l loan.checked_out_at.to_date, format: :short %><% end %>.<br>
+           Due back <%= l loan.due_date, format: :long %> <% if loan.overdue? %><span class="badge overdue">Overdue</span><% end %></p>
+        <% if loan.borrower %><p class="small"><%= mail_to loan.borrower.email_address %></p><% end %>
+        <%= button_to "✅ Check in", return_borrow_request_path(loan), method: :patch, class: "btn btn-block" %>
+      <% else %>
+        <h3 style="margin-top:0">Check out</h3>
+        <p class="small muted">Lending it in person? Record who has it.</p>
+        <%= form_with scope: :check_out, url: check_out_tool_path(@tool) do |f| %>
+          <div class="field"><%= f.label :borrower_name, "Who's borrowing it?" %><%= f.text_field :borrower_name, placeholder: "Name" %></div>
+          <div class="field"><%= f.label :borrower_email, "Their Tool Share email (optional)" %><%= f.email_field :borrower_email, placeholder: "Links it to their account" %></div>
+          <div class="field"><%= f.label :due_date, "Due back" %><%= f.date_field :due_date, value: Date.current + 7, required: true %></div>
+          <%= f.submit "Check out", class: "btn btn-block" %>
+        <% end %>
+        <p class="small muted">Requests from members also appear on your <%= link_to "dashboard", dashboard_path %>.</p>
+      <% end %>
     <% elsif !authenticated? %>
       <h3 style="margin-top:0">Want to borrow it?</h3>
       <p><%= link_to "Sign in", new_session_path %> or <%= link_to "create an account", new_registration_path %> to send a request.</p>
     <% elsif @my_open_request %>
       <h3 style="margin-top:0">Your request</h3>
-      <p><span class="badge <%= @my_open_request.status %>"><%= @my_open_request.status.capitalize %></span>
+      <p><span class="badge <%= @my_open_request.status %>"><%= @my_open_request.approved? ? "Checked out to you" : @my_open_request.status.capitalize %></span>
          <%= l @my_open_request.start_date, format: :short %> – <%= l @my_open_request.due_date, format: :short %></p>
       <% if @my_open_request.pending? %>
         <%= button_to "Cancel request", cancel_borrow_request_path(@my_open_request), method: :patch, class: "btn btn-ghost" %>
@@ -44,3 +75,20 @@
     <% end %>
   </aside>
 </div>
+
+<% if @history.present? %>
+  <section>
+    <h2>Check-out history</h2>
+    <div class="card table-wrap"><table>
+      <tr><th>Borrower</th><th>Out</th><th>Due</th><th>Back</th></tr>
+      <% @history.each do |loan| %>
+        <tr>
+          <td><%= loan.borrower_display_name %><%= " (member)" if loan.borrower %></td>
+          <td class="small"><%= l (loan.checked_out_at || loan.start_date).to_date, format: :short %></td>
+          <td class="small"><%= l loan.due_date, format: :short %></td>
+          <td class="small"><%= loan.returned_at ? l(loan.returned_at.to_date, format: :short) : (loan.overdue? ? tag.span("Overdue", class: "badge overdue") : "Still out") %></td>
+        </tr>
+      <% end %>
+    </table></div>
+  </section>
+<% end %>

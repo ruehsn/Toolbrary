@@ -15,6 +15,11 @@ Rails.application.routes.draw do
 
   resources :tools do
     resources :borrow_requests, only: :create
+    post :check_out, on: :member
+  end
+  resources :categories, only: %i[index create]
+  resources :tool_imports, only: %i[new create show destroy] do
+    post :confirm, on: :member
   end
   resources :borrow_requests, only: [] do
     member do

@@ -56,3 +56,9 @@ end
 gem "webauthn", "~> 3.5"
 
 gem "letter_opener_web", "~> 3.0", group: :development
+
+gem "anthropic", "~> 2.14"
+
+gem "image_processing", "~> 2.2"
+
+gem "ruby-vips", "~> 2.3"

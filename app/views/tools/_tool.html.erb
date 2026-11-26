@@ -1,6 +1,7 @@
 <%= link_to tool, class: "card tool-card" do %>
+  <%= render "tools/photo", tool: tool %>
   <h3><%= tool.name %></h3>
-  <div class="small muted"><%= tool.category.presence || "Uncategorised" %><%= " · #{tool.condition}" if tool.condition.present? %></div>
+  <div class="small muted"><%= tool.category&.label || "Uncategorised" %><%= " · #{tool.condition}" if tool.condition.present? %></div>
   <% if tool.description.present? %><div class="small"><%= truncate(tool.description, length: 90) %></div><% end %>
   <div class="actions" style="margin-top:auto">
     <%= render "tools/status", tool: tool %>

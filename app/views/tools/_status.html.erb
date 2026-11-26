@@ -1,8 +1,8 @@
-<% loan = tool.borrow_requests.find(&:approved?) %>
+<% loan = tool.current_loan %>
 <% if loan.nil? %>
   <span class="badge available">Available</span>
 <% elsif loan.overdue? %>
   <span class="badge overdue">Overdue</span>
 <% else %>
-  <span class="badge lent">Lent out until <%= l loan.due_date, format: :short %></span>
+  <span class="badge lent">Checked out until <%= l loan.due_date, format: :short %></span>
 <% end %>

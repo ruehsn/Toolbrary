@@ -18,7 +18,7 @@
           <td class="small"><%= l r.start_date, format: :short %> – <%= l r.due_date, format: :short %></td>
           <td class="small"><%= r.message %></td>
           <td><div class="actions">
-            <%= button_to "Approve", approve_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ok" %>
+            <%= button_to "Approve & check out", approve_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ok" %>
             <%= button_to "Decline", decline_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ghost" %>
           </div></td>
         </tr>
@@ -29,29 +29,47 @@
   <% end %>
 </section>
 
+<% if @imports.any? %>
 <section>
-  <h2>Currently lent out</h2>
+  <h2>Photo imports</h2>
+  <div class="card table-wrap"><table>
+    <% @imports.each do |imp| %>
+      <tr>
+        <td><%= link_to "Import from #{time_ago_in_words(imp.created_at)} ago", imp %></td>
+        <td><%= pluralize(imp.photos.size, "photo") %></td>
+        <td><%= { "pending" => "Waiting…", "processing" => "Analysing…", "ready" => "Ready to review (#{imp.items.size} found)", "failed" => "Failed" }[imp.status] %></td>
+      </tr>
+    <% end %>
+  </table></div>
+</section>
+<% end %>
+
+<section>
+  <h2>Currently checked out</h2>
   <% if @lent_out.any? %>
     <div class="card table-wrap"><table>
       <tr><th>Tool</th><th>Borrower</th><th>Due back</th><th></th></tr>
       <% @lent_out.each do |r| %>
         <tr>
           <td><%= link_to r.tool.name, r.tool %></td>
-          <td><%= r.borrower.name %><br><span class="small muted"><%= mail_to r.borrower.email_address %></span></td>
+          <td><%= r.borrower_display_name %><% if r.borrower %><br><span class="small muted"><%= mail_to r.borrower.email_address %></span><% end %></td>
           <td><%= l r.due_date, format: :short %> <% if r.overdue? %><span class="badge overdue">Overdue</span><% end %></td>
-          <td><%= button_to "Mark returned", return_borrow_request_path(r), method: :patch, class: "btn btn-small" %></td>
+          <td><%= button_to "Check in", return_borrow_request_path(r), method: :patch, class: "btn btn-small" %></td>
         </tr>
       <% end %>
     </table></div>
   <% else %>
-    <p class="empty">Nothing is out right now.</p>
+    <p class="empty">Nothing is checked out right now. Open a tool to check it out to someone.</p>
   <% end %>
 </section>
 
 <section>
   <div class="actions" style="justify-content:space-between">
     <h2>My tools (<%= @tools.size %>)</h2>
-    <%= link_to "+ Add tool", new_tool_path, class: "btn" %>
+    <div class="actions">
+      <%= link_to "📷 Add from photos", new_tool_import_path, class: "btn btn-ghost" %>
+      <%= link_to "+ Add tool", new_tool_path, class: "btn" %>
+    </div>
   </div>
   <% if @tools.any? %>
     <div class="grid"><%= render @tools %></div>
@@ -71,7 +89,7 @@
           <td><%= link_to r.owner.name, r.owner %>
             <% if r.approved? %><br><span class="small muted"><%= mail_to r.owner.email_address %></span><% end %></td>
           <td class="small"><%= l r.start_date, format: :short %> – <%= l r.due_date, format: :short %></td>
-          <td><span class="badge <%= r.overdue? ? "overdue" : r.status %>"><%= r.overdue? ? "Overdue" : r.status.capitalize %></span></td>
+          <td><span class="badge <%= r.overdue? ? "overdue" : r.status %>"><%= r.overdue? ? "Overdue" : { "approved" => "Checked out", "returned" => "Returned" }.fetch(r.status, r.status.capitalize) %></span></td>
           <td><% if r.pending? %><%= button_to "Cancel", cancel_borrow_request_path(r), method: :patch, class: "btn btn-small btn-ghost" %><% end %></td>
         </tr>
       <% end %>

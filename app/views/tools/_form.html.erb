@@ -1,8 +1,43 @@
 <%= form_with model: tool, class: "card narrow" do |f| %>
   <%= render "shared/errors", record: tool %>
   <div class="field"><%= f.label :name %><%= f.text_field :name, required: true, placeholder: "e.g. Cordless drill (18V)" %></div>
-  <div class="field"><%= f.label :category %><%= f.select :category, Tool::CATEGORIES, include_blank: "Choose…" %></div>
+
+  <div class="field">
+    <%= f.label :category_id, "Category" %>
+    <%= f.collection_select :category_id, Category.alphabetical, :id, :label, include_blank: "Choose…" %>
+    <details class="small" <%= "open" if tool.new_category_name.present? %>>
+      <summary>Not listed? Add a new category</summary>
+      <%= f.text_field :new_category_name, placeholder: "e.g. Bike repair", maxlength: 40 %>
+    </details>
+  </div>
+
   <div class="field"><%= f.label :condition %><%= f.select :condition, Tool::CONDITIONS, include_blank: "Choose…" %></div>
+
+  <div class="field">
+    <%= f.label :photos, "Photos" %>
+    <%# Saved photos only (pending, possibly invalid uploads aren't shown) %>
+    <% saved_photos = tool.persisted? ? ActiveStorage::Attachment.where(record: tool, name: "photos").includes(:blob) : [] %>
+    <% if saved_photos.any? %>
+      <div class="photo-edit-grid">
+        <% saved_photos.each do |photo| %>
+          <label class="photo-edit">
+            <%= image_tag photo.variant(:thumb), alt: "" %>
+            <span><%= check_box_tag "tool[remove_photo_ids][]", photo.id, false, id: "remove_photo_#{photo.id}" %> Remove</span>
+          </label>
+        <% end %>
+      </div>
+    <% end %>
+    <%= f.file_field :photos, multiple: true, accept: Tool::PHOTO_TYPES.join(","), name: "tool[photos][]" %>
+    <span class="small muted">Up to <%= Tool::MAX_PHOTOS %> photos. On a phone you can take them with the camera.</span>
+  </div>
+
   <div class="field"><%= f.label :description, "Description / notes for borrowers" %><%= f.text_area :description, rows: 4, placeholder: "Comes with 2 batteries and a charger. Please return clean." %></div>
+
+  <div class="field">
+    <%= f.label :replacement_url, "Replacement link (optional)" %>
+    <%= f.url_field :replacement_url, placeholder: "https://… where to buy another one" %>
+    <span class="small muted">Shown as “Buy a replacement”, handy if it breaks or goes missing.</span>
+  </div>
+
   <div class="actions"><%= f.submit %> <%= link_to "Cancel", tool.persisted? ? tool : dashboard_path, class: "btn btn-ghost" %></div>
 <% end %>

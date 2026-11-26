@@ -1,0 +1,19 @@
+<% content_for :title, "Add tools from photos · Tool Share" %>
+<h1>📷 Add tools from photos</h1>
+<%= form_with model: @tool_import, class: "card narrow" do |f| %>
+  <p style="margin-top:0">Snap your bench, pegboard or shed shelves. AI finds each tool, crops a photo of it and drafts the listing. You review everything before it's added.</p>
+  <% unless ToolPhotoAnalyzer.configured? %>
+    <p class="flash alert">AI import isn't set up on this server yet (missing <code>ANTHROPIC_API_KEY</code>). You can still upload; the import will tell you it failed.</p>
+  <% end %>
+  <%= render "shared/errors", record: @tool_import %>
+  <div class="field">
+    <%= f.label :photos, "Photos (up to #{ToolImport::MAX_PHOTOS})" %>
+    <%= f.file_field :photos, multiple: true, accept: Tool::PHOTO_TYPES.join(","), required: true, name: "tool_import[photos][]" %>
+  </div>
+  <ul class="small muted">
+    <li>Lay tools out with a little space between them, in good light.</li>
+    <li>About 3–12 tools per photo works best.</li>
+    <li>Photos are sent to Anthropic's Claude API for analysis.</li>
+  </ul>
+  <%= f.submit "Find my tools", class: "btn btn-block", data: { turbo_submits_with: "Uploading…" } %>
+<% end %>

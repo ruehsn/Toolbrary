@@ -1,0 +1,6 @@
+<%# Thumbnail or a placeholder showing the category icon %>
+<% if (photo = tool.photos.first) %>
+  <%= image_tag photo.variant(:thumb), alt: tool.name, class: "tool-thumb", loading: "lazy" %>
+<% else %>
+  <div class="tool-thumb placeholder" aria-hidden="true"><%= tool.category&.icon.presence || "🧰" %></div>
+<% end %>
