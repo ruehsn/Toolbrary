@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class GetTool < Base
     tool_name "get_tool"
     title "Get tool details"

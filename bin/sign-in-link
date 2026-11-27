@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Prints a one-time sign-in link, creating the account if needed.
+# Useful before email (SMTP) is set up, or if you're locked out.
+#   Locally:  bin/sign-in-link you@example.com
+#   On Fly:   fly ssh console -C "/rails/bin/sign-in-link you@example.com"
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[ $# -ge 1 ] || { echo "Usage: bin/sign-in-link EMAIL" >&2; exit 1; }
+# fly ssh runs as root; run as the app user so database files keep the right owner
+if [ "$(id -u)" = "0" ] && id rails >/dev/null 2>&1; then
+  export HOME=/home/rails
+  exec setpriv --reuid=1000 --regid=1000 --init-groups "$0" "$@"
+fi
+exec bin/rails "auth:sign_in_link[$1]"

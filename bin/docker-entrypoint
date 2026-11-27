@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+# Volumes are mounted owned by root; give storage/ to the app user and drop privileges.
+if [ "$(id -u)" = "0" ]; then
+  mkdir -p /rails/storage
+  chown -R rails:rails /rails/storage
+  export HOME=/home/rails
+  exec setpriv --reuid=1000 --regid=1000 --init-groups "$0" "$@"
+fi
+
+# Create or migrate the databases (and seed default categories on first boot) before starting the server.
+if [ "$1" == "./bin/rails" ] && [ "$2" == "server" ]; then
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"

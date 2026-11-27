@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# First-time Fly.io deployment for Toolbrary. Safe to re-run (existing pieces are reused).
+#   bin/fly-setup
+# After this, deploy updates with: fly deploy
+set -euo pipefail
+cd "$(dirname "$0")/.."
+export PATH="$HOME/.fly/bin:$PATH"
+
+command -v fly >/dev/null || { echo "flyctl not found. Run bin/setup-wsl, or: curl -L https://fly.io/install.sh | sh"; exit 1; }
+fly auth whoami >/dev/null 2>&1 || fly auth login
+
+current_app="$(sed -n 's/^app = "\(.*\)"/\1/p' fly.toml)"
+current_region="$(sed -n 's/^primary_region = "\(.*\)"/\1/p' fly.toml)"
+[ "$current_app" = "CHANGE-ME" ] && current_app="toolbrary-$(whoami | tr -cd 'a-z0-9' | cut -c1-12)"
+
+echo "App names are global on Fly.io; your site will be https://<name>.fly.dev"
+read -rp "App name [$current_app]: " app;  app="${app:-$current_app}"
+echo "Pick the region nearest you, e.g. iad (Virginia), ord (Chicago), sjc (California), lhr (London), syd (Sydney). Full list: fly platform regions"
+read -rp "Region [$current_region]: " region; region="${region:-$current_region}"
+
+sed -i "s/^app = .*/app = \"$app\"/; s/^primary_region = .*/primary_region = \"$region\"/" fly.toml
+
+if fly status -a "$app" >/dev/null 2>&1; then
+  echo "Using existing app $app."
+else
+  fly apps create "$app"
+fi
+
+if fly volumes list -a "$app" 2>/dev/null | grep -q toolbrary_data; then
+  echo "Volume toolbrary_data exists."
+else
+  # One volume = one machine; SQLite lives here, with uploaded photos. Daily snapshots are on by default.
+  fly volumes create toolbrary_data -a "$app" --region "$region" --size 1 --yes
+fi
+
+secrets="$(fly secrets list -a "$app" 2>/dev/null || true)"
+if ! grep -q SECRET_KEY_BASE <<<"$secrets"; then
+  fly secrets set -a "$app" --stage SECRET_KEY_BASE="$(openssl rand -hex 64)"
+fi
+
+if ! grep -q SMTP_ADDRESS <<<"$secrets"; then
+  echo
+  echo "Sign-in links are sent by email. Enter your SMTP provider's details (Resend, Postmark,"
+  echo "SendGrid, Mailgun, Gmail app password, ...), or press Enter to skip and add them later."
+  read -rp "SMTP server (e.g. smtp.resend.com): " smtp_address
+  if [ -n "$smtp_address" ]; then
+    read -rp "SMTP port [587]: " smtp_port
+    read -rp "SMTP username: " smtp_user
+    read -rsp "SMTP password / API key: " smtp_pass; echo
+    read -rp "Send emails from (e.g. Toolbrary <no-reply@yourdomain.com>): " mail_from
+    fly secrets set -a "$app" --stage SMTP_ADDRESS="$smtp_address" SMTP_PORT="${smtp_port:-587}" \
+      SMTP_USERNAME="$smtp_user" SMTP_PASSWORD="$smtp_pass" MAILER_FROM="$mail_from"
+  fi
+fi
+
+fly deploy -a "$app"
+
+cat <<MSG
+
+Deployed: https://$app.fly.dev
+
+Create your account (works even before email is set up):
+  fly ssh console -a $app -C "/rails/bin/sign-in-link you@example.com"
+Open the printed link, then add a passkey under Account.
+
+Later:  fly deploy (ship changes) · fly logs · fly secrets set KEY=value
+Optional built-in AI photo analysis:  fly secrets set ANTHROPIC_API_KEY=sk-ant-...
+MSG

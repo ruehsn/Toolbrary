@@ -24,7 +24,7 @@ class McpEndpointTest < ActionDispatch::IntegrationTest
   test "rejects missing and revoked tokens" do
     rpc("tools/list", token: nil)
     assert_response :unauthorized
-    rpc("tools/list", token: "tsk_nope")
+    rpc("tools/list", token: "tbk_nope")
     assert_response :unauthorized
     ApiToken.destroy_all
     rpc("tools/list")
@@ -33,7 +33,7 @@ class McpEndpointTest < ActionDispatch::IntegrationTest
 
   test "initialize and list tools" do
     init = rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "test", version: "1" } })
-    assert_equal "tool-share", init.dig("result", "serverInfo", "name")
+    assert_equal "toolbrary", init.dig("result", "serverInfo", "name")
     assert_match(/photo/, init.dig("result", "instructions"))
     names = rpc("tools/list").dig("result", "tools").map { _1["name"] }
     assert_includes names, "submit_import_items"

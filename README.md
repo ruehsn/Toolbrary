@@ -1,4 +1,4 @@
-# Tool Share
+# Toolbrary
 
 A small Rails 8 app for keeping track of your tools and letting other people see
 what you have so they can ask to borrow it.
@@ -25,7 +25,7 @@ what you have so they can ask to borrow it.
   until Friday", "approve Alice's request". The app needs no AI provider of its own.
 - **📷 Add tools from photos** – upload up to 10 photos of a bench, pegboard or shelf, then pick who
   analyses them:
-  - **your own AI assistant** (default): ask it to "catalogue my Tool Share photo imports"; it fetches
+  - **your own AI assistant** (default): ask it to "catalogue my Toolbrary photo imports"; it fetches
     each photo over MCP and submits what it sees, or
   - **the built-in AI** (optional, needs `ANTHROPIC_API_KEY`).
 
@@ -41,27 +41,55 @@ what you have so they can ask to borrow it.
   A tool can't be lent to two people at once.
 - Email addresses are shown only between an owner and the person requesting, so they can arrange pickup.
 
-## Running it
-Needs **libvips** for photos (`apt install libvips42` / `brew install vips`).
+## Develop on Windows (WSL + VS Code)
+
+In your WSL terminal (keep the code inside the Linux filesystem, e.g. `~/code`, not under `/mnt/c`, which is much slower):
 ```bash
-bundle install
-bin/rails db:prepare db:seed   # demo users alice@example.com and bob@example.com
-bin/rails server               # http://localhost:3000
+git clone https://github.com/ruehsn/Toolbrary.git ~/code/toolbrary
+cd ~/code/toolbrary
+bin/setup-wsl      # installs what's missing: libvips, SQLite, Ruby (via rbenv/mise/asdf), gems, flyctl; seeds demo data
+code .             # VS Code connected to WSL (needs the "WSL" extension on Windows)
 ```
-In development, emails aren't really sent: open **http://localhost:3000/letter_opener**
-to see them and click the sign-in links.
+Accept VS Code's prompt to install the recommended extensions (Ruby LSP, rdbg debugger, TOML, …).
 
-To connect an AI assistant locally, create a token under Account → AI assistants and use
-`http://localhost:3000/mcp`. To also enable the optional built-in photo analysis:
-`ANTHROPIC_API_KEY=sk-ant-... bin/rails server`.
+- **Run:** `bin/dev` → http://localhost:3000. Or *Run Task → Rails: server*, or press F5 with "Rails server (debug)" to stop at breakpoints.
+- **Sign in:** emails aren't really sent in development. Open http://localhost:3000/letter_opener and click the link.
+  Demo users: `alice@example.com`, `bob@example.com`. Or run `bin/sign-in-link you@example.com`.
+- **Test:** `bin/rails test` (or *Run Task → Rails: all tests*).
+- **AI assistant:** create a token under Account → AI assistants and point your MCP client at `http://localhost:3000/mcp`.
+  The optional built-in photo analysis needs `ANTHROPIC_API_KEY=sk-ant-... bin/dev`.
 
-Passkeys only work on `localhost` or over HTTPS, and only on the origin they were created for.
+Passkeys work on `localhost` and over HTTPS, and only on the domain they were created for.
+
+## Deploy to Fly.io
+
+```bash
+bin/fly-setup
+```
+It signs you in to Fly, asks for an app name and region, creates the app and a 1 GB volume
+(SQLite database + photos), generates `SECRET_KEY_BASE`, optionally stores your email (SMTP)
+settings, and deploys. Then create your account:
+```bash
+fly ssh console -C "/rails/bin/sign-in-link you@example.com"
+```
+Open the printed link and add a passkey under Account. After that, ship changes with `fly deploy`.
+
+Notes:
+- **Email:** sign-in links for everyone else need SMTP. Any provider works (Resend, Postmark, SendGrid, Mailgun,
+  Amazon SES, Gmail with an app password):
+  `fly secrets set SMTP_ADDRESS=... SMTP_USERNAME=... SMTP_PASSWORD=... MAILER_FROM="Toolbrary <no-reply@yourdomain>"`.
+- **One machine:** SQLite lives on the volume, so keep the app at one machine. It sleeps when idle and
+  wakes on the next request (a few seconds), so cost stays low. Fly takes daily volume snapshots.
+- **Custom domain:** `fly certs add tools.example.com`, then `fly secrets set APP_ORIGIN=https://tools.example.com`.
+  Passkeys created on the old domain stop working there; users sign in by email and add new ones.
+- **Image:** `Dockerfile` (Ruby 3.3.14, libvips, jemalloc). It runs as a non-root user and migrates
+  the database on boot (`bin/docker-entrypoint`).
 
 ## MCP server
 
 Streamable HTTP (stateless, JSON responses) at `POST /mcp`, built on the official
 [`mcp` Ruby SDK](https://github.com/modelcontextprotocol/ruby-sdk). Authenticate with
-`Authorization: Bearer tsk_…`. Tokens are created and revoked under Account → AI assistants,
+`Authorization: Bearer tbk_…`. Tokens are created and revoked under Account → AI assistants,
 and only their SHA-256 digests are stored.
 
 | Tool | What it does |
@@ -76,7 +104,7 @@ and only their SHA-256 digests are stored.
 Code: `app/mcp/` (one class per tool) and `app/controllers/mcp_controller.rb`.
 Example (Claude Code):
 ```bash
-claude mcp add --transport http tool-share https://tools.example.com/mcp --header "Authorization: Bearer tsk_..."
+claude mcp add --transport http toolbrary https://<your-app>.fly.dev/mcp --header "Authorization: Bearer tbk_..."
 ```
 Web-only connectors that require OAuth (claude.ai, ChatGPT) aren't supported yet. They need an
 OAuth 2.1 authorization server, which would be the next step.
@@ -98,17 +126,13 @@ bin/rails test
 - `ApiToken` – personal MCP tokens (digest only)
 
 ## Production settings
+Set with `fly secrets set NAME=value` (or `[env]` in `fly.toml` for non-secrets).
+
 | Env var | Purpose |
 |---|---|
-| `APP_ORIGIN` | Public URL, e.g. `https://tools.example.com`. Used for passkeys and for links in emails. |
+| `SECRET_KEY_BASE` | Required. `bin/fly-setup` generates it. |
+| `SMTP_ADDRESS`, `SMTP_PORT` (587), `SMTP_USERNAME`, `SMTP_PASSWORD` | Email delivery for sign-in links. |
 | `MAILER_FROM` | Sender address for sign-in emails. |
+| `APP_ORIGIN` | Public URL. Defaults to `https://<app>.fly.dev` on Fly; set it for a custom domain. Used for passkeys, email links and MCP. |
 | `ANTHROPIC_API_KEY` | Optional. Enables the *built-in* AI photo analysis (one Claude API call per photo). Without it, users' own assistants do the analysis over MCP. |
-
-Background jobs (AI import, emails) use Solid Queue in production: run `bin/jobs`, or set
-`SOLID_QUEUE_IN_PUMA=1` to run them inside the web server. Uploaded photos are stored on local
-disk (`storage/`); for multiple servers, configure S3 or similar in `config/storage.yml`.
-
-You also need a real email service (SMTP, Postmark, etc.): set
-`config.action_mailer.delivery_method` and its settings in `config/environments/production.rb`.
-Changing the domain later invalidates existing passkeys (users can still sign in by email
-and add new ones).
+| `SOLID_QUEUE_IN_PUMA` | Set to `1` in `fly.toml`: background jobs (emails, built-in AI) run inside the web server. |

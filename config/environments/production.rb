@@ -28,7 +28,8 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Skip http-to-https redirect for the default health check endpoint.
-  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  # Fly.io health checks hit /up over plain HTTP inside the private network.
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [ :request_id ]
@@ -57,7 +58,22 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: URI(ENV.fetch("APP_ORIGIN", "https://example.com")).host, protocol: URI(ENV.fetch("APP_ORIGIN", "https://example.com")).scheme }
+  config.action_mailer.default_url_options = { host: URI(Rails.application.config.x.app_origin).host, protocol: "https" }
+
+  # Sign-in links are emailed, so production needs an SMTP service (Resend, Postmark, SendGrid,
+  # Mailgun, Amazon SES, Gmail with an app password, ...). Set SMTP_ADDRESS, SMTP_USERNAME, SMTP_PASSWORD
+  # (and SMTP_PORT if not 587) with `fly secrets set`.
+  if ENV["SMTP_ADDRESS"].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: ENV["SMTP_ADDRESS"],
+      port: ENV.fetch("SMTP_PORT", 587).to_i,
+      user_name: ENV["SMTP_USERNAME"],
+      password: ENV["SMTP_PASSWORD"],
+      authentication: :plain,
+      enable_starttls_auto: true
+    }
+  end
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {

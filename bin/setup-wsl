@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# One-time setup for developing Toolbrary on WSL (Ubuntu/Debian). Safe to re-run:
+# anything already installed is skipped.
+#   bin/setup-wsl
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+RUBY_VERSION="$(tr -d '[:space:]' < .ruby-version)"
+SUDO=""; [ "$(id -u)" = "0" ] || SUDO="sudo"
+step() { printf '\n\033[1;34m== %s\033[0m\n' "$*"; }
+
+step "System packages (compilers, libvips for photos, SQLite)"
+packages=(build-essential git curl ca-certificates pkg-config libssl-dev libyaml-dev zlib1g-dev libffi-dev
+          libreadline-dev libgmp-dev libvips42t64 sqlite3 libsqlite3-dev)
+# Older Ubuntu releases name the libvips package without the t64 suffix
+apt-cache show libvips42t64 >/dev/null 2>&1 || packages=("${packages[@]/libvips42t64/libvips42}")
+missing=()
+for p in "${packages[@]}"; do dpkg -s "$p" >/dev/null 2>&1 || missing+=("$p"); done
+if [ ${#missing[@]} -gt 0 ]; then
+  $SUDO apt-get update
+  $SUDO apt-get install -y "${missing[@]}"
+else
+  echo "All present."
+fi
+
+step "Ruby $RUBY_VERSION"
+if command -v ruby >/dev/null && [ "$(ruby -e 'print RUBY_VERSION')" = "$RUBY_VERSION" ]; then
+  echo "Already active: $(ruby -v)"
+elif command -v mise >/dev/null; then
+  mise install "ruby@$RUBY_VERSION" && mise use "ruby@$RUBY_VERSION"
+  eval "$(mise env -s bash)"
+elif command -v asdf >/dev/null; then
+  asdf plugin add ruby 2>/dev/null || true
+  asdf install ruby "$RUBY_VERSION" && asdf set ruby "$RUBY_VERSION" 2>/dev/null || asdf local ruby "$RUBY_VERSION"
+else
+  # rbenv (installed for you if no Ruby version manager is present)
+  if [ ! -d "$HOME/.rbenv" ]; then
+    git clone --depth 1 https://github.com/rbenv/rbenv.git "$HOME/.rbenv"
+    grep -q 'rbenv init' "$HOME/.bashrc" 2>/dev/null || {
+      echo 'export PATH="$HOME/.rbenv/bin:$PATH"'
+      echo 'eval "$(rbenv init - bash)"'
+    } >> "$HOME/.bashrc"
+  fi
+  export PATH="$HOME/.rbenv/bin:$PATH"
+  eval "$(rbenv init - bash)"
+  if [ -d "$HOME/.rbenv/plugins/ruby-build" ]; then
+    git -C "$HOME/.rbenv/plugins/ruby-build" pull --quiet   # needs to know about new Ruby releases
+  else
+    git clone --depth 1 https://github.com/rbenv/ruby-build.git "$HOME/.rbenv/plugins/ruby-build"
+  fi
+  echo "Compiling Ruby $RUBY_VERSION (takes a few minutes the first time)..."
+  rbenv install --skip-existing "$RUBY_VERSION"
+  rbenv rehash
+fi
+ruby -v
+
+step "Gems and development database (with demo data)"
+bin/setup --skip-server
+
+step "flyctl (Fly.io command line)"
+if command -v fly >/dev/null || [ -x "$HOME/.fly/bin/flyctl" ]; then
+  echo "Already installed."
+else
+  curl -fsSL https://fly.io/install.sh | sh
+  grep -q '.fly/bin' "$HOME/.bashrc" 2>/dev/null || echo 'export PATH="$HOME/.fly/bin:$PATH"' >> "$HOME/.bashrc"
+fi
+
+step "Done"
+cat <<MSG
+Open a new terminal (or run: source ~/.bashrc), then:
+  code .            # opens VS Code connected to WSL; install the recommended extensions when asked
+  bin/dev           # http://localhost:3000. Emails show up at http://localhost:3000/letter_opener
+  bin/rails test
+Deploy to Fly.io:   bin/fly-setup
+MSG

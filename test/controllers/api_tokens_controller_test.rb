@@ -6,14 +6,14 @@ class ApiTokensControllerTest < ActionDispatch::IntegrationTest
     assert_difference("ApiToken.count") { post api_tokens_path, params: { api_token: { name: "Laptop" } } }
     assert_response :success
     plain = css_select("pre.token code").text.strip
-    assert plain.start_with?("tsk_")
+    assert plain.start_with?("tbk_")
     token = ApiToken.last
     assert_not_equal plain, token.token_digest
     assert_equal token, ApiToken.authenticate(plain)
     assert_select "pre", text: /claude mcp add/
 
     get account_path
-    assert_select "code", text: "tsk_…#{plain.last(4)}"
+    assert_select "code", text: "tbk_…#{plain.last(4)}"
     assert_no_match plain, response.body
 
     delete api_token_path(token)

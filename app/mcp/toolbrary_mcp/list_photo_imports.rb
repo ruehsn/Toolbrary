@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class ListPhotoImports < Base
     tool_name "list_photo_imports"
     title "List photo imports waiting for analysis"

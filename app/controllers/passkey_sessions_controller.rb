@@ -13,7 +13,7 @@ class PasskeySessionsController < ApplicationController
   def create
     credential = WebAuthn::Credential.from_get(params.require(:credential).to_unsafe_h)
     passkey = Passkey.find_by(external_id: credential.id)
-    return render(json: { error: "This passkey isn't registered with Tool Share." }, status: :unprocessable_entity) unless passkey
+    return render(json: { error: "This passkey isn't registered with Toolbrary." }, status: :unprocessable_entity) unless passkey
 
     credential.verify(
       session.delete(:passkey_auth_challenge),

@@ -1,0 +1,13 @@
+{
+  "rubyLsp.rubyVersionManager": { "identifier": "auto" },
+  "rubyLsp.formatter": "rubocop",
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[erb]": { "editor.tabSize": 2 },
+  "files.associations": { "*.html.erb": "erb", "Dockerfile*": "dockerfile" },
+  "files.exclude": { "tmp/": true, "log/": true, "public/assets/": true },
+  "search.exclude": { "storage/": true, "tmp/": true, "log/": true, "vendor/": true }
+}

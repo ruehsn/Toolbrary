@@ -1,9 +1,9 @@
-<% content_for :title, "Token created · Tool Share" %>
+<% content_for :title, "Token created · Toolbrary" %>
 <h1>🤖 Connect “<%= @api_token.name %>”</h1>
 <div class="card">
   <p style="margin-top:0"><strong>Copy this token now. It won't be shown again.</strong></p>
   <pre class="token"><code><%= @api_token.plain_token %></code></pre>
-  <p class="small muted">Anyone with this token can act as you in Tool Share. Revoke it from your account page if it leaks.</p>
+  <p class="small muted">Anyone with this token can act as you in Toolbrary. Revoke it from your account page if it leaks.</p>
   <%= render "shared/mcp_setup", token: @api_token.plain_token %>
   <p><%= link_to "Done, back to my account", account_path(anchor: "ai-assistants"), class: "btn" %></p>
 </div>

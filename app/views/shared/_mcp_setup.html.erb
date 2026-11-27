@@ -2,13 +2,13 @@
 <% url = mcp_url %>
 <div class="setup">
   <h4>Claude Code</h4>
-  <pre><code>claude mcp add --transport http tool-share <%= url %> --header "Authorization: Bearer <%= token %>"</code></pre>
+  <pre><code>claude mcp add --transport http toolbrary <%= url %> --header "Authorization: Bearer <%= token %>"</code></pre>
 
   <h4>Cursor, VS Code, Windsurf and other clients with a JSON config</h4>
-  <pre><code><%= JSON.pretty_generate({ "mcpServers" => { "tool-share" => { "url" => url, "headers" => { "Authorization" => "Bearer #{token}" } } } }) %></code></pre>
+  <pre><code><%= JSON.pretty_generate({ "mcpServers" => { "toolbrary" => { "url" => url, "headers" => { "Authorization" => "Bearer #{token}" } } } }) %></code></pre>
 
   <h4>Claude Desktop and clients that only run local (stdio) servers</h4>
-  <pre><code><%= JSON.pretty_generate({ "mcpServers" => { "tool-share" => { "command" => "npx", "args" => [ "-y", "mcp-remote", url, "--header", "Authorization: Bearer #{token}" ] } } }) %></code></pre>
+  <pre><code><%= JSON.pretty_generate({ "mcpServers" => { "toolbrary" => { "command" => "npx", "args" => [ "-y", "mcp-remote", url, "--header", "Authorization: Bearer #{token}" ] } } }) %></code></pre>
 
   <p class="small muted">Any other MCP client: Streamable HTTP at <code><%= url %></code> with header <code>Authorization: Bearer &lt;token&gt;</code>.</p>
 </div>

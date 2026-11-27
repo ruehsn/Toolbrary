@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class RequestToBorrow < Base
     tool_name "request_to_borrow"
     title "Ask to borrow someone's tool"

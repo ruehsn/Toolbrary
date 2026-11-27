@@ -18,10 +18,16 @@ require "rails/test_unit/railtie"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module ToolShare
+module Toolbrary
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
+
+    # Public URL of the app, used for passkeys, email links and the MCP endpoint.
+    # On Fly.io it defaults to https://<app>.fly.dev; set APP_ORIGIN when you add a custom domain.
+    config.x.app_origin = ENV["APP_ORIGIN"].presence ||
+      (ENV["FLY_APP_NAME"].present? && "https://#{ENV["FLY_APP_NAME"]}.fly.dev") ||
+      (Rails.env.test? ? "http://www.example.com" : "http://localhost:3000")
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

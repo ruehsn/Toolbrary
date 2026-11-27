@@ -1,7 +1,7 @@
-# Tool Share's MCP server. Any MCP-capable AI assistant (Claude, ChatGPT,
+# Toolbrary's MCP server. Any MCP-capable AI assistant (Claude, ChatGPT,
 # Cursor, a local model, ...) can connect to POST /mcp with a personal API
 # token and work with the user's shed. The app itself doesn't need an AI provider.
-module ToolShareMcp
+module ToolbraryMcp
   TOOLS = [
     SearchTools, GetTool, ListCategories, MyShed,
     AddTool, UpdateTool, CheckOutTool, CheckInTool,
@@ -10,7 +10,7 @@ module ToolShareMcp
   ].freeze
 
   INSTRUCTIONS = <<~TEXT.freeze
-    Tool Share is a neighbourhood tool library. Each user lists tools they own so others can borrow them.
+    Toolbrary is a neighbourhood tool library. Each user lists tools they own so others can borrow them.
     You act for one signed-in user ("me"). Use my_shed for an overview of my tools, loans and requests,
     and search_tools to find tools other people lend.
 
@@ -25,8 +25,8 @@ module ToolShareMcp
 
   def self.server_for(user)
     MCP::Server.new(
-      name: "tool-share",
-      title: "Tool Share",
+      name: "toolbrary",
+      title: "Toolbrary",
       version: "1.0.0",
       instructions: INSTRUCTIONS,
       tools: TOOLS,

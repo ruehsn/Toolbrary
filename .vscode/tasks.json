@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Rails: server", "type": "shell", "command": "bin/dev", "isBackground": true, "problemMatcher": [] },
+    { "label": "Rails: all tests", "type": "shell", "command": "bin/rails test", "group": { "kind": "test", "isDefault": true }, "problemMatcher": [] },
+    { "label": "Rails: test current file", "type": "shell", "command": "bin/rails test ${relativeFile}", "group": "test", "problemMatcher": [] },
+    { "label": "Lint + security checks", "type": "shell", "command": "bin/rubocop && bin/brakeman -q --no-pager", "problemMatcher": [] },
+    { "label": "Fly: deploy", "type": "shell", "command": "fly deploy", "problemMatcher": [] },
+    { "label": "Fly: logs", "type": "shell", "command": "fly logs", "isBackground": true, "problemMatcher": [] },
+    { "label": "Fly: sign-in link for me", "type": "shell", "command": "fly ssh console -C \"/rails/bin/sign-in-link ${input:email}\"", "problemMatcher": [] }
+  ],
+  "inputs": [
+    { "id": "email", "type": "promptString", "description": "Your email address" }
+  ]
+}

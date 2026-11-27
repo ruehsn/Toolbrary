@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Tool Share" %></title>
+    <title><%= content_for(:title) || "Toolbrary" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="application-name" content="Tool Share">
+    <meta name="application-name" content="Toolbrary">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -16,7 +16,7 @@
   <body>
     <header class="topbar">
       <div class="wrap topbar-inner">
-        <%= link_to "🔧 Tool Share", root_path, class: "brand" %>
+        <%= link_to "🔧 Toolbrary", root_path, class: "brand" %>
         <nav>
           <%= link_to "Browse tools", root_path %>
           <%= link_to "Categories", categories_path %>

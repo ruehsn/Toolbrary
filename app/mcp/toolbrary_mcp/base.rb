@@ -1,5 +1,5 @@
-module ToolShareMcp
-  # Shared helpers for Tool Share MCP tools.
+module ToolbraryMcp
+  # Shared helpers for Toolbrary MCP tools.
   class Base < MCP::Tool
     READ_ONLY = { read_only_hint: true, destructive_hint: false, idempotent_hint: true, open_world_hint: false }.freeze
     WRITES = { read_only_hint: false, destructive_hint: false, idempotent_hint: false, open_world_hint: false }.freeze

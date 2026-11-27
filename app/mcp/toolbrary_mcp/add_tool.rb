@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class AddTool < Base
     tool_name "add_tool"
     title "Add a tool to my shed"

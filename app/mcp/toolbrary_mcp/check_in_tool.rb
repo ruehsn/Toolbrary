@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class CheckInTool < Base
     tool_name "check_in_tool"
     title "Check in one of my tools"

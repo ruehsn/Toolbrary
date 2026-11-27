@@ -1,7 +1,7 @@
-<% content_for :title, "Check your email · Tool Share" %>
+<% content_for :title, "Check your email · Toolbrary" %>
 <div class="card narrow" style="margin-top:32px">
   <h1 style="margin-top:0">📬 Check your email</h1>
-  <p>If <strong><%= @email.presence || "your address" %></strong> can be used for Tool Share, we've sent it a link. Open it on this device to continue.</p>
+  <p>If <strong><%= @email.presence || "your address" %></strong> can be used for Toolbrary, we've sent it a link. Open it on this device to continue.</p>
   <p class="small muted">Sign-in links expire after 15 minutes and work once. Nothing arrived? Check spam, or <%= link_to "try again", new_session_path %>.</p>
   <% if Rails.env.development? %>
     <p class="small"><strong>Development:</strong> emails aren't really sent — open the <%= link_to "dev inbox", "/letter_opener", target: "_blank" %>.</p>

@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class SearchTools < Base
     tool_name "search_tools"
     title "Search tools"

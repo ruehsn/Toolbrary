@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class ListCategories < Base
     tool_name "list_categories"
     title "List categories"

@@ -66,7 +66,7 @@ class ToolsController < ApplicationController
                                      borrower_name: attrs[:borrower_name].to_s.squish.presence)
     if (email = attrs[:borrower_email].to_s.strip.downcase).present?
       loan.borrower = User.find_by(email_address: email)
-      return redirect_to(@tool, alert: "No Tool Share member has that email. Leave email blank and just enter their name.") unless loan.borrower
+      return redirect_to(@tool, alert: "No Toolbrary member has that email. Leave email blank and just enter their name.") unless loan.borrower
     end
 
     if loan.save

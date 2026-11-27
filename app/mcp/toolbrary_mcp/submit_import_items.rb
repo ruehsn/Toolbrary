@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class SubmitImportItems < Base
     tool_name "submit_import_items"
     title "Submit the tools found in a photo import"

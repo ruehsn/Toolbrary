@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class UpdateTool < Base
     tool_name "update_tool"
     title "Edit one of my tools"

@@ -1,8 +1,8 @@
-module ToolShareMcp
+module ToolbraryMcp
   class CheckOutTool < Base
     tool_name "check_out_tool"
     title "Check out one of my tools"
-    description "Record that someone now has one of the user's tools. Give borrower_email for a Tool Share member, " \
+    description "Record that someone now has one of the user's tools. Give borrower_email for a Toolbrary member, " \
                 "or just borrower_name for anyone else."
     annotations(**WRITES)
     input_schema(

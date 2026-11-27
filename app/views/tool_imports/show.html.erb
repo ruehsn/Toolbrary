@@ -1,4 +1,4 @@
-<% content_for :title, "Photo import · Tool Share" %>
+<% content_for :title, "Photo import · Toolbrary" %>
 <% if @tool_import.working? || @tool_import.awaiting_assistant? %>
   <% content_for :head do %><meta http-equiv="refresh" content="<%= @tool_import.awaiting_assistant? ? 5 : 3 %>"><% end %>
 <% end %>
@@ -8,7 +8,7 @@
   <div class="card narrow">
     <p style="margin-top:0"><span class="spinner" aria-hidden="true"></span> <strong>Waiting for your AI assistant</strong></p>
     <p>In your assistant, ask something like:</p>
-    <blockquote>“Catalogue my Tool Share photo imports.”</blockquote>
+    <blockquote>“Catalogue my Toolbrary photo imports.”</blockquote>
     <p class="small muted">It will look at <%= pluralize(@tool_import.photos.size, "photo") %>, list the tools it finds, and this page will update so you can review them.
       Not connected yet? <%= link_to "Set up an assistant", account_path(anchor: "ai-assistants") %>.</p>
     <div class="photo-strip">

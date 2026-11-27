@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class GetImportPhoto < Base
     MAX_EDGE = 1568
 

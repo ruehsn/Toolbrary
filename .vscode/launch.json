@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "rdbg",
+      "name": "Rails server (debug)",
+      "request": "launch",
+      "command": "${workspaceFolder}/bin/rails",
+      "script": "server",
+      "args": [],
+      "askParameters": false
+    },
+    {
+      "type": "rdbg",
+      "name": "Test current file (debug)",
+      "request": "launch",
+      "command": "${workspaceFolder}/bin/rails",
+      "script": "test",
+      "args": ["${file}"],
+      "askParameters": false
+    },
+    {
+      "type": "rdbg",
+      "name": "Attach to running process",
+      "request": "attach"
+    }
+  ]
+}

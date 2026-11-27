@@ -1,4 +1,4 @@
-module ToolShareMcp
+module ToolbraryMcp
   class RespondToBorrowRequest < Base
     tool_name "respond_to_borrow_request"
     title "Approve or decline a borrow request"

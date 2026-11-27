@@ -1,4 +1,4 @@
-<% content_for :title, "Account · Tool Share" %>
+<% content_for :title, "Account · Toolbrary" %>
 <h1>Your account</h1>
 
 <div class="two-col">
@@ -62,7 +62,7 @@
       <% @api_tokens.each do |t| %>
         <tr>
           <td><%= t.name %></td>
-          <td class="small"><code>tsk_…<%= t.token_hint %></code></td>
+          <td class="small"><code>tbk_…<%= t.token_hint %></code></td>
           <td class="small"><%= t.last_used_at ? "#{time_ago_in_words(t.last_used_at)} ago" : "Never" %></td>
           <td><%= button_to "Revoke", api_token_path(t), method: :delete, class: "btn btn-small btn-danger",
                     form: { data: { turbo_confirm: "Revoke this token? Assistants using it will be disconnected." } } %></td>

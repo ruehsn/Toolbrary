@@ -1,4 +1,4 @@
-<% content_for :title, "#{@tool.name} · Tool Share" %>
+<% content_for :title, "#{@tool.name} · Toolbrary" %>
 <p><%= link_to "← All tools", root_path %><% if @tool.category %> · <%= link_to @tool.category.label, root_path(category: @tool.category.to_param) %><% end %></p>
 <div class="two-col">
   <div class="card">
@@ -48,7 +48,7 @@
         <p class="small muted">Lending it in person? Record who has it.</p>
         <%= form_with scope: :check_out, url: check_out_tool_path(@tool) do |f| %>
           <div class="field"><%= f.label :borrower_name, "Who's borrowing it?" %><%= f.text_field :borrower_name, placeholder: "Name" %></div>
-          <div class="field"><%= f.label :borrower_email, "Their Tool Share email (optional)" %><%= f.email_field :borrower_email, placeholder: "Links it to their account" %></div>
+          <div class="field"><%= f.label :borrower_email, "Their Toolbrary email (optional)" %><%= f.email_field :borrower_email, placeholder: "Links it to their account" %></div>
           <div class="field"><%= f.label :due_date, "Due back" %><%= f.date_field :due_date, value: Date.current + 7, required: true %></div>
           <%= f.submit "Check out", class: "btn btn-block" %>
         <% end %>

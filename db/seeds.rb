@@ -1,5 +1,7 @@
+# Default categories everywhere; demo users and tools in development only.
 # Demo data: bin/rails db:seed   (sign in via email link; see /letter_opener in development)
 Category.create_defaults!
+return unless Rails.env.development?
 
 alice = User.find_or_create_by!(email_address: "alice@example.com") { |u| u.name = "Alice" }
 bob   = User.find_or_create_by!(email_address: "bob@example.com")   { |u| u.name = "Bob" }

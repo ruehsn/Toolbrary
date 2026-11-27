@@ -1,7 +1,7 @@
 # Personal access token for AI assistants connecting over MCP.
 # Only a SHA-256 digest is stored; the plain token is shown once at creation.
 class ApiToken < ApplicationRecord
-  PREFIX = "tsk_"
+  PREFIX = "tbk_"
 
   belongs_to :user
 
